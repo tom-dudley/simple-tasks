@@ -1,5 +1,8 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
+    import { onMount } from "svelte";
+
+    let loading = $state(true);
 
     type AppState = {
         tasks: Task[];
@@ -29,10 +32,18 @@
         };
     }
 
-    async function loadTasks() {
-        let state: AppState = await invoke("restore_app_state");
-        appState = state;
-    }
+    onMount(() => {
+        async function loadTasks() {
+            let state: AppState = await invoke("restore_app_state");
+            appState = state;
+            loading = false;
+        }
+
+        loadTasks();
+        console.log("Loading: {loading}");
+
+        return () => console.log("Tasks loaded!");
+    });
 
     const addTask = async (event) => {
         let task: Task = await invoke("add_task", {
@@ -53,32 +64,37 @@
     }
 </script>
 
-<form onsubmit={preventDefault(addTask)}>
-    <input
-        id="task-input"
-        type="text"
-        autocomplete="off"
-        spellcheck="false"
-        placeholder="Task..."
-        bind:value={newTaskDescription}
-        onsubmit={addTask}
-    />
-    <button>Add</button>
-</form>
+{#if loading}
+    <div>Loading...</div>
+{:else}
+    <form onsubmit={preventDefault(addTask)}>
+        <input
+            id="task-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Task..."
+            bind:value={newTaskDescription}
+            onsubmit={addTask}
+        />
+        <button>Add</button>
+    </form>
 
-<button onclick={loadTasks}>Load Tasks</button>
+    <!-- <button onclick={loadTasks}>Load Tasks</button> -->
 
-<ul>
-    {#each appState.tasks as task (task.id)}
-        <li>
-            <div>{task.description}</div>
-            <span
-                ><button onclick={() => removeTaskById(task.id)}>Remove</button
-                ></span
-            >
-        </li>
-    {/each}
-</ul>
+    <ul>
+        {#each appState.tasks as task (task.id)}
+            <li>
+                <div>{task.description}</div>
+                <span
+                    ><button onclick={() => removeTaskById(task.id)}
+                        >Remove</button
+                    ></span
+                >
+            </li>
+        {/each}
+    </ul>
+{/if}
 
 <style>
     li {
