@@ -69,6 +69,7 @@ fn remove_task(state: State<'_, Mutex<AppState>>, task_id: i32) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             Ok(())
