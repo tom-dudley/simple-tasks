@@ -1,12 +1,38 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
 
-    let newTaskDescription = $state("");
+    type AppState = {
+        tasks: Task[];
+        next_task_id: number;
+    };
+
     type Task = {
         id: number;
         description: string;
     };
-    let tasks: Task[] = $state([]);
+
+    let initialState: AppState = {
+        tasks: [],
+        next_task_id: 0,
+    };
+
+    let newTaskDescription = $state("");
+    let appState: AppState = $state({
+        tasks: [],
+        next_task_id: 1,
+    });
+
+    function preventDefault(fn) {
+        return function (event) {
+            event.preventDefault();
+            fn.call(this, event);
+        };
+    }
+
+    async function loadTasks() {
+        let state: AppState = await invoke("restore_app_state");
+        appState = state;
+    }
 
     const addTask = async (event) => {
         let task: Task = await invoke("add_task", {
@@ -16,20 +42,13 @@
         // TODO: We get a Svelte error about mutating a value outside a component
         // console.log("Response from rust: " + JSON.stringify(task, null, 2));
 
-        tasks.push(task);
+        appState.tasks.push(task);
 
         event.target.reset();
     };
 
-    function preventDefault(fn) {
-        return function (event) {
-            event.preventDefault();
-            fn.call(this, event);
-        };
-    }
-
     async function removeTaskById(id: number) {
-        tasks = tasks.filter((task) => task.id !== id);
+        appState.tasks = appState.tasks.filter((task) => task.id !== id);
         await invoke("remove_task", { taskId: id });
     }
 </script>
@@ -47,10 +66,12 @@
     <button>Add</button>
 </form>
 
+<button onclick={loadTasks}>Load Tasks</button>
+
 <ul>
-    {#each tasks as task (task.id)}
+    {#each appState.tasks as task (task.id)}
         <li>
-            {task.description}
+            <div>{task.description}</div>
             <span
                 ><button onclick={() => removeTaskById(task.id)}>Remove</button
                 ></span
@@ -63,10 +84,13 @@
     li {
         text-align: left;
         display: flex;
+        align-items: center;
         justify-content: space-between;
         border-bottom: grey;
         border-bottom-style: solid;
         border-bottom-width: 1px;
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
 
     input,

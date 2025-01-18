@@ -1,25 +1,49 @@
+use std::fs;
+use std::fs::File;
 use std::sync::Mutex;
-use std::{fs::File, io::Write};
+use tauri::Emitter;
+use tauri::Manager;
 use tauri::State;
-use tauri::{Builder, Manager};
 
-#[derive(Default)]
+#[derive(Default, serde::Serialize, serde::Deserialize, Clone)]
 struct AppState {
     tasks: Vec<Task>,
     next_task_id: i32,
 }
 
-#[derive(serde::Serialize, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 struct Task {
     id: i32,
     description: String,
 }
 
-fn save_tasks(tasks: &[Task]) -> std::io::Result<()> {
+fn save_tasks(state: &AppState) -> std::io::Result<()> {
     let path = "/Users/tom/.tasks";
     let file = File::create(path)?;
-    serde_json::to_writer(file, &tasks)?;
+    serde_json::to_writer(file, &state)?;
     Ok(())
+}
+
+#[tauri::command]
+fn restore_app_state() -> AppState {
+    println!("Restoring app state...");
+    let path = "/Users/tom/.tasks";
+
+    let state = read_state_from_file(path);
+
+    let number_of_tasks = state.tasks.len();
+    println!("Restored {number_of_tasks} tasks");
+
+    state
+}
+
+fn read_state_from_file(path: &str) -> AppState {
+    let data = match fs::read_to_string(path) {
+        Ok(content) => content,
+        Err(_) => return AppState::default(),
+    };
+
+    serde_json::from_str(&data).unwrap_or_default()
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -49,7 +73,7 @@ fn add_task(state: State<'_, Mutex<AppState>>, task_description: &str) -> Task {
         println!("    {description}");
     }
 
-    match save_tasks(&state.tasks) {
+    match save_tasks(&state) {
         Ok(_) => println!("Saving completed successfully."),
         Err(e) => eprintln!("Error occurred: {}", e),
     }
@@ -78,7 +102,7 @@ fn remove_task(state: State<'_, Mutex<AppState>>, task_id: i32) {
         println!("    {description}");
     }
 
-    match save_tasks(&state.tasks) {
+    match save_tasks(&state) {
         Ok(_) => println!("Saving completed successfully."),
         Err(e) => eprintln!("Error occurred: {}", e),
     }
@@ -89,11 +113,20 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
-            app.manage(Mutex::new(AppState::default()));
+            let state = restore_app_state();
+            let state_to_send = state.clone();
+            app.manage(Mutex::new(state));
+
+            // Push the state to the frontend via an event
+            app.emit("app-state-restored", state_to_send);
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![add_task, remove_task])
+        .invoke_handler(tauri::generate_handler![
+            add_task,
+            remove_task,
+            restore_app_state
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
