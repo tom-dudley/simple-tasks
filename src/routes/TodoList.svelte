@@ -7,21 +7,45 @@
     };
     let tasks: Task[] = $state([]);
 
-    function addTask() {
+    // function addTask() {
+    //     tasks.push({
+    //         id: nextId,
+    //         task: newTask,
+    //     });
+    //     nextId += 1;
+    //     // clearTextbox();
+    // }
+
+    const addTask = async (event) => {
         tasks.push({
             id: nextId,
             task: newTask,
         });
         nextId += 1;
-        // clearTextbox();
+        const formData = new FormData(event.target);
+        event.target.reset();
+    };
+
+    function once(fn) {
+        return function (event) {
+            if (fn) fn.call(this, event);
+            fn = null;
+        };
     }
 
-    function removeTask() {
-        tasks.pop();
+    function preventDefault(fn) {
+        return function (event) {
+            event.preventDefault();
+            fn.call(this, event);
+        };
+    }
+
+    function removeTaskById(id: number) {
+        tasks = tasks.filter((task) => task.id !== id);
     }
 </script>
 
-<form onsubmit={addTask}>
+<form onsubmit={preventDefault(addTask)}>
     <input
         id="task-input"
         type="text"
@@ -31,14 +55,17 @@
         bind:value={newTask}
         onsubmit={addTask}
     />
-    <button type="submit">Add</button>
+    <button>Add</button>
 </form>
 
 <ul>
     {#each tasks as task (task.id)}
         <li>
             {task.task}
-            <span><button onclick={removeTask}>Remove</button></span>
+            <span
+                ><button onclick={() => removeTaskById(task.id)}>Remove</button
+                ></span
+            >
         </li>
     {/each}
 </ul>
