@@ -12,11 +12,20 @@
   "app": {
     "windows": [
       {
-        "title": "tauri-svelte",
+        "title": "Tom's Todo List",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "minWidth": 400,
+        "minHeight": 400,
+        "alwaysOnTop": true
       }
     ],
+    "trayIcon": {
+        "iconPath": "icons/32x32.png",
+        "title": "Tom's Todo App",
+        "tooltip": "Todo Tooltip",
+        "menuOnLeftClick": true
+    },
     "security": {
       "csp": null
     }
