@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Tom's Todo List",
-        "width": 800,
-        "height": 600,
+        "width": 400,
+        "height": 400,
         "minWidth": 400,
         "minHeight": 400,
         "alwaysOnTop": true
@@ -23,8 +23,7 @@
     "trayIcon": {
         "iconPath": "icons/32x32.png",
         "title": "Tom's Todo App",
-        "tooltip": "Todo Tooltip",
-        "menuOnLeftClick": true
+        "tooltip": "Todo Tooltip"
     },
     "security": {
       "csp": null

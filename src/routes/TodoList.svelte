@@ -1,6 +1,8 @@
 <script lang="ts">
+    import { invoke } from "@tauri-apps/api/core";
+
     let newTask = $state("");
-    let nextId = 1;
+    let nextId = 0;
     type Task = {
         id: number;
         task: string;
@@ -15,6 +17,9 @@
         nextId += 1;
         const formData = new FormData(event.target);
         event.target.reset();
+
+        let taskFromRust = await invoke("add_task", { task: newTask });
+        console.log("Response from rust: " + taskFromRust);
     };
 
     function preventDefault(fn) {
@@ -24,8 +29,9 @@
         };
     }
 
-    function removeTaskById(id: number) {
+    async function removeTaskById(id: number) {
         tasks = tasks.filter((task) => task.id !== id);
+        await invoke("remove_task", { taskId: id });
     }
 </script>
 
