@@ -1,4 +1,5 @@
 use std::sync::Mutex;
+use std::{fs::File, io::Write};
 use tauri::State;
 use tauri::{Builder, Manager};
 
@@ -12,6 +13,13 @@ struct AppState {
 struct Task {
     id: i32,
     description: String,
+}
+
+fn save_tasks(tasks: &[Task]) -> std::io::Result<()> {
+    let path = "/Users/tom/.tasks";
+    let file = File::create(path)?;
+    serde_json::to_writer(file, &tasks)?;
+    Ok(())
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -41,6 +49,11 @@ fn add_task(state: State<'_, Mutex<AppState>>, task_description: &str) -> Task {
         println!("    {description}");
     }
 
+    match save_tasks(&state.tasks) {
+        Ok(_) => println!("Saving completed successfully."),
+        Err(e) => eprintln!("Error occurred: {}", e),
+    }
+
     task_to_return
 }
 
@@ -63,6 +76,11 @@ fn remove_task(state: State<'_, Mutex<AppState>>, task_id: i32) {
         let description = &task.description;
         println!("    {id}");
         println!("    {description}");
+    }
+
+    match save_tasks(&state.tasks) {
+        Ok(_) => println!("Saving completed successfully."),
+        Err(e) => eprintln!("Error occurred: {}", e),
     }
 }
 
