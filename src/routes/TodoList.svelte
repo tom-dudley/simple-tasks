@@ -1,25 +1,24 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
 
-    let newTask = $state("");
-    let nextId = 0;
+    let newTaskDescription = $state("");
     type Task = {
         id: number;
-        task: string;
+        description: string;
     };
     let tasks: Task[] = $state([]);
 
     const addTask = async (event) => {
-        tasks.push({
-            id: nextId,
-            task: newTask,
+        let task: Task = await invoke("add_task", {
+            taskDescription: newTaskDescription,
         });
-        nextId += 1;
-        const formData = new FormData(event.target);
-        event.target.reset();
 
-        let taskFromRust = await invoke("add_task", { task: newTask });
-        console.log("Response from rust: " + taskFromRust);
+        // TODO: We get a Svelte error about mutating a value outside a component
+        // console.log("Response from rust: " + JSON.stringify(task, null, 2));
+
+        tasks.push(task);
+
+        event.target.reset();
     };
 
     function preventDefault(fn) {
@@ -42,7 +41,7 @@
         autocomplete="off"
         spellcheck="false"
         placeholder="Task..."
-        bind:value={newTask}
+        bind:value={newTaskDescription}
         onsubmit={addTask}
     />
     <button>Add</button>
@@ -51,7 +50,7 @@
 <ul>
     {#each tasks as task (task.id)}
         <li>
-            {task.task}
+            {task.description}
             <span
                 ><button onclick={() => removeTaskById(task.id)}>Remove</button
                 ></span

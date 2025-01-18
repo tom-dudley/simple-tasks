@@ -8,6 +8,7 @@ struct AppState {
     next_task_id: i32,
 }
 
+#[derive(serde::Serialize, Clone)]
 struct Task {
     id: i32,
     description: String,
@@ -15,16 +16,21 @@ struct Task {
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-fn add_task(state: State<'_, Mutex<AppState>>, task: &str) -> String {
+fn add_task(state: State<'_, Mutex<AppState>>, task_description: &str) -> Task {
     let mut state = state.lock().unwrap();
 
     let next_task_id = state.next_task_id;
     state.next_task_id += 1;
 
-    state.tasks.push(Task {
+    let new_task = Task {
         id: next_task_id,
-        description: task.to_string(),
-    });
+        description: task_description.to_string(),
+    };
+
+    // TODO: Figure out if there's a better thing to do here than clone
+    let task_to_return = new_task.clone();
+
+    state.tasks.push(new_task);
 
     let number_of_tasks = state.tasks.len();
     println!("Tasks ({number_of_tasks}):");
@@ -34,7 +40,8 @@ fn add_task(state: State<'_, Mutex<AppState>>, task: &str) -> String {
         println!("    {id}");
         println!("    {description}");
     }
-    task.to_string()
+
+    task_to_return
 }
 
 #[tauri::command]
