@@ -7,15 +7,6 @@
     };
     let tasks: Task[] = $state([]);
 
-    // function addTask() {
-    //     tasks.push({
-    //         id: nextId,
-    //         task: newTask,
-    //     });
-    //     nextId += 1;
-    //     // clearTextbox();
-    // }
-
     const addTask = async (event) => {
         tasks.push({
             id: nextId,
@@ -25,13 +16,6 @@
         const formData = new FormData(event.target);
         event.target.reset();
     };
-
-    function once(fn) {
-        return function (event) {
-            if (fn) fn.call(this, event);
-            fn = null;
-        };
-    }
 
     function preventDefault(fn) {
         return function (event) {
@@ -78,10 +62,6 @@
         border-bottom: grey;
         border-bottom-style: solid;
         border-bottom-width: 1px;
-    }
-    .row {
-        display: flex;
-        justify-content: center;
     }
 
     input,
