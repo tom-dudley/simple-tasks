@@ -24,16 +24,21 @@ fn save_tasks(state: &AppState) -> std::io::Result<()> {
 }
 
 #[tauri::command]
-fn restore_app_state() -> AppState {
+fn restore_app_state(state_mutex: State<'_, Mutex<AppState>>) -> AppState {
     println!("Restoring app state...");
     let path = "/Users/tom/.tasks";
 
-    let state = read_state_from_file(path);
+    let restore_state = read_state_from_file(path);
+    let state_to_return = restore_state.clone();
 
-    let number_of_tasks = state.tasks.len();
+    let number_of_tasks = restore_state.tasks.len();
     println!("Restored {number_of_tasks} tasks");
 
-    state
+    let mut state = state_mutex.lock().unwrap();
+    state.tasks = restore_state.tasks;
+    state.next_task_id = restore_state.next_task_id;
+
+    state_to_return
 }
 
 fn read_state_from_file(path: &str) -> AppState {
@@ -133,7 +138,7 @@ pub fn run() {
                 println!("End of item")
             }
 
-            app.manage(AppState::default());
+            app.manage(Mutex::new(AppState::default()));
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
