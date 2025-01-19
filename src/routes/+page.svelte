@@ -6,9 +6,7 @@
 
 <main class="container">
     <PinButton />
-    <h1>Todo List</h1>
-
-    <p>Enter some Todos!</p>
+    <p>What do you need to do?</p>
 
     <TodoList />
 </main>

@@ -11,20 +11,27 @@
 
 <div style="display: flex; justify-content: flex-end">
     <button onclick={toggleAlwaysOnTop}>
-        <i class="fa fa-thumbtack"></i>
         {#if alwaysOnTop}
-            <div>Enabled</div>
+            <i style="color: #ff5733" class="fa fa-thumbtack"></i>
+            <div id="button-text">Enabled</div>
         {:else}
-            <div>Disabled</div>
+            <i class="fa fa-thumbtack"></i>
+            <div id="button-text">Disabled</div>
         {/if}
     </button>
 </div>
 
 <style>
+    .fa {
+        font-size: 0.75em;
+    }
+    #button-text {
+        font-size: 0.5em;
+    }
     button {
         border-radius: 8px;
         border: 1px solid transparent;
-        padding: 0.6em 1.2em;
+        padding: 0.3em 0.5em;
         font-size: 1em;
         font-weight: 500;
         font-family: inherit;
