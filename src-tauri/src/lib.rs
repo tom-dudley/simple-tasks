@@ -112,6 +112,36 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
+            let window = app
+                .get_webview_window("main")
+                .expect("Could not get window");
+            let menu = window.menu().expect("Could not get menu");
+            let items = menu.items();
+
+            menu.remove_at(1); // File
+            menu.remove_at(1); // Edit
+            menu.remove_at(1); // View
+            menu.remove_at(1); // Window
+            menu.remove_at(1); //  Help
+                               //let file_menu = menu.get("File").expect("Couldn't get file menu");
+                               //let menuitem = file_menu.as_menuitem();
+                               //menu.remove(file_menu);
+
+            //println!("{menu_name}");
+            for item in items {
+                for thing in item {
+                    let sub_menu = thing.as_submenu().unwrap();
+                    let name = sub_menu.text().unwrap();
+
+                    if name == "Edit" {
+                        //menu.remove_at(2);
+                    }
+
+                    println!("Got menu item '{name}'");
+                }
+                println!("End of item")
+            }
+
             app.manage(AppState::default());
             Ok(())
         })
