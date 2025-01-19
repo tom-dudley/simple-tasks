@@ -1,8 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-svelte",
+  "productName": "Simple Tasks",
+  "mainBinaryName": "Simple Tasks",
   "version": "0.1.0",
-  "identifier": "com.tauri-svelte.app",
+  "identifier": "com.simple-tasks.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +15,7 @@
       {
         "label": "main",
         "visible": false,
-        "title": "Tom's Todo List",
+        "title": "Simple Tasks",
         "width": 400,
         "height": 400,
         "minWidth": 400,
@@ -25,7 +26,7 @@
     ],
     "trayIcon": {
         "iconPath": "icons/32x32.png",
-        "title": "Tom's Todo App",
+        "title": "Simple Tasks",
         "tooltip": "Todo Tooltip"
     },
     "security": {

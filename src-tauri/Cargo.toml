@@ -1,7 +1,7 @@
 [package]
-name = "tauri-svelte"
+name = "simple-tasks"
 version = "0.1.0"
-description = "A Tauri App"
+description = "Simple Tasks"
 authors = ["you"]
 edition = "2021"
 
