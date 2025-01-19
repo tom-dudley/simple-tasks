@@ -12,11 +12,15 @@
   "app": {
     "windows": [
       {
+        "label": "main",
+        "visible": false,
         "title": "Tom's Todo List",
         "width": 400,
         "height": 400,
         "minWidth": 400,
         "minHeight": 400,
+        "x": 300,
+        "y": 0,
         "alwaysOnTop": true
       }
     ],

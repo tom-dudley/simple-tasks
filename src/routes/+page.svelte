@@ -1,7 +1,12 @@
 <script lang="ts">
     import TodoList from "./TodoList.svelte";
+
+    let loading = $state(true);
 </script>
 
+<!-- {#if loading} -->
+<!-- <div>Loading...</div> -->
+<!-- {:else} -->
 <main class="container">
     <h1>Todo List</h1>
 
@@ -9,6 +14,8 @@
 
     <TodoList />
 </main>
+
+<!-- {/if} -->
 
 <style>
     :root {

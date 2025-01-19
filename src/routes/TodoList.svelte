@@ -1,6 +1,7 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
     import { onMount } from "svelte";
+    import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
     let loading = $state(true);
 
@@ -38,8 +39,18 @@
             appState = state;
             loading = false;
         }
+        function delay(ms: number) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
+        async function show(ms: number) {
+            await delay(ms);
+            await getCurrentWebviewWindow().show();
+        }
 
         loadTasks();
+        // 100 is good, 50 is good I think, 25 is good
+        show(50);
         console.log("Loading: {loading}");
 
         return () => console.log("Tasks loaded!");
@@ -79,8 +90,6 @@
         />
         <button>Add</button>
     </form>
-
-    <!-- <button onclick={loadTasks}>Load Tasks</button> -->
 
     <ul>
         {#each appState.tasks as task (task.id)}

@@ -1,9 +1,8 @@
 use std::fs;
 use std::fs::File;
 use std::sync::Mutex;
-use tauri::Emitter;
-use tauri::Manager;
 use tauri::State;
+use tauri::{Manager, Window};
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Clone)]
 struct AppState {
@@ -113,12 +112,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
-            let state = restore_app_state();
-            let state_to_send = state.clone();
-            app.manage(Mutex::new(state));
-
-            // Push the state to the frontend via an event
-            app.emit("app-state-restored", state_to_send);
+            app.manage(AppState::default());
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
