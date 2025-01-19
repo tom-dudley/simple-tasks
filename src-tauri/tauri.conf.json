@@ -20,8 +20,7 @@
         "minWidth": 400,
         "minHeight": 400,
         "x": 300,
-        "y": 0,
-        "alwaysOnTop": true
+        "y": 0
       }
     ],
     "trayIcon": {

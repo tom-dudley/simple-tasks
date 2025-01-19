@@ -9,7 +9,7 @@
     "core:default",
     "opener:default",
     "fs:default",
-    "fs:default",
-    "core:window:allow-show"
+    "core:window:allow-show",
+    "core:window:allow-set-always-on-top"
   ]
 }
