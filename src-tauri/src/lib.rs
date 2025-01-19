@@ -10,6 +10,11 @@ struct AppState {
     next_task_id: i32,
 }
 
+fn get_path() -> String {
+    let path = "/Users/tom/.tasks";
+    path.to_string()
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 struct Task {
     id: i32,
@@ -17,7 +22,7 @@ struct Task {
 }
 
 fn save_tasks(state: &AppState) -> std::io::Result<()> {
-    let path = "/Users/tom/.tasks";
+    let path = get_path();
     let file = File::create(path)?;
     serde_json::to_writer(file, &state)?;
     Ok(())
@@ -26,7 +31,7 @@ fn save_tasks(state: &AppState) -> std::io::Result<()> {
 #[tauri::command]
 fn restore_app_state(state_mutex: State<'_, Mutex<AppState>>) -> AppState {
     println!("Restoring app state...");
-    let path = "/Users/tom/.tasks";
+    let path = get_path();
 
     let restore_state = read_state_from_file(path);
     let state_to_return = restore_state.clone();
@@ -41,7 +46,7 @@ fn restore_app_state(state_mutex: State<'_, Mutex<AppState>>) -> AppState {
     state_to_return
 }
 
-fn read_state_from_file(path: &str) -> AppState {
+fn read_state_from_file(path: String) -> AppState {
     let data = match fs::read_to_string(path) {
         Ok(content) => content,
         Err(_) => return AppState::default(),
