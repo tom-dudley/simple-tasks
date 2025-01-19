@@ -1,8 +1,10 @@
+use std::env;
+use std::env::current_dir;
 use std::fs;
 use std::fs::File;
 use std::sync::Mutex;
+use tauri::Manager;
 use tauri::State;
-use tauri::{Manager, Window};
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Clone)]
 struct AppState {
@@ -11,7 +13,15 @@ struct AppState {
 }
 
 fn get_path() -> String {
+    #[cfg(target_os = "macos")]
     let path = "/Users/tom/.tasks";
+
+    #[cfg(target_os = "android")]
+    let path = "/data/data/com.simple_tasks.app/.tasks";
+    //let path = "/data/user/0/com.simple_tasks.app/.tasks";
+
+    println!("Path: {path}");
+
     path.to_string()
 }
 
@@ -53,6 +63,32 @@ fn read_state_from_file(path: String) -> AppState {
     };
 
     serde_json::from_str(&data).unwrap_or_default()
+}
+
+#[tauri::command]
+fn debug_info(state: State<'_, Mutex<AppState>>) -> String {
+    //env::current_dir().unwrap_or_default().display().to_string()
+    let mut result = String::new();
+    result.push_str("\n");
+
+    // Print env vars
+    //for (key, value) in env::vars() {
+    //    result.push_str(&format!("{}={};", key, value));
+    //    result.push_str("\n");
+    //}
+
+    // Print paths
+    //let path = "/data/data/com.simple_tasks.app";
+    //let paths = fs::read_dir(path).unwrap();
+    //for path in paths {
+    //    let name = path.unwrap().path().display().to_string();
+    //    //println!("Name: {name}");
+    //    result.push_str(";");
+    //    result.push_str(name.as_str());
+    //    result.push_str("\n");
+    //}
+
+    result.clone()
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -117,31 +153,38 @@ fn remove_task(state: State<'_, Mutex<AppState>>, task_id: i32) {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn hide_menus_on_mac(app: &mut tauri::App) {
+    let window = app
+        .get_webview_window("main")
+        .expect("Could not get window");
+    let menu = window.menu().expect("Could not get menu");
+
+    for item in menu.items() {
+        for thing in item {
+            let sub_menu = thing.as_submenu().unwrap();
+            let name = sub_menu.text().unwrap();
+
+            match name.as_str() {
+                "Edit" | "Window" | "View" | "Help" => {
+                    println!("Removing menu item '{name}'");
+                    menu.remove(&thing);
+                }
+                _ => println!("Retaining menu item '{name}'"),
+            }
+        }
+        println!("End of item")
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
-            let window = app
-                .get_webview_window("main")
-                .expect("Could not get window");
-            let menu = window.menu().expect("Could not get menu");
-
-            for item in menu.items() {
-                for thing in item {
-                    let sub_menu = thing.as_submenu().unwrap();
-                    let name = sub_menu.text().unwrap();
-
-                    match name.as_str() {
-                        "Edit" | "Window" | "View" | "Help" => {
-                            println!("Removing menu item '{name}'");
-                            menu.remove(&thing);
-                        }
-                        _ => println!("Retaining menu item '{name}'"),
-                    }
-                }
-                println!("End of item")
-            }
+            println!("Starting app..");
+            #[cfg(target_os = "macos")]
+            hide_menus_on_mac(app);
 
             app.manage(Mutex::new(AppState::default()));
             Ok(())
@@ -150,7 +193,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             add_task,
             remove_task,
-            restore_app_state
+            restore_app_state,
+            debug_info
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

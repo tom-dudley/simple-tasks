@@ -1,5 +1,6 @@
 <script lang="ts">
     import PinButton from "./PinButton.svelte";
+    import DebugInfo from "./DebugInfo.svelte";
     import TodoList from "./TodoList.svelte";
     import "@fortawesome/fontawesome-free/css/all.min.css";
 </script>
@@ -9,6 +10,7 @@
     <p>What do you need to do?</p>
 
     <TodoList />
+    <!-- <DebugInfo /> -->
 </main>
 
 <style>
